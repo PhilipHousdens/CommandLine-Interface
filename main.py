@@ -15,6 +15,21 @@ def tf_idf(query, unigrams, idf_values):
         scores[doc_id] = score
     return sorted(scores.items(), key=lambda x: x[1], reverse=True)[:5]
 
+def bm25(query, unigrams, idf_values, k1=1.5, b=0.75):
+    scores = {}
+    avg_doc_len = sum(sum(counts.values()) for counts in unigrams.values()) / len(unigrams)
+    for doc_id, term_counts in unigrams.items():
+        doc_len = sum(term_counts.values())
+        score = 0
+        for term in query:
+            tf = term_counts[term]
+            idf = idf_values.get(term, 0)
+            numerator = tf * (k1 + 1)
+            denominator = tf + k1 * (1 - b + b * doc_len / avg_doc_len)
+            score += idf * numerator / denominator
+        scores[doc_id] = score
+    return sorted(scores.items(), key=lambda x: x[1], reverse=True)[:5]
+
 
 
 def main():
